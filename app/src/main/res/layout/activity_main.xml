@@ -11,7 +11,8 @@
     tools:context="cl.cadcc.folio.MainActivity">
 
     <TextView
-        android:text="Hello World!"
-        android:layout_width="wrap_content"
+        android:id="@+id/textView_tui"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content" />
+
 </RelativeLayout>
