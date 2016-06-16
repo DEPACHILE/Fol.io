@@ -1,6 +1,5 @@
 package cl.cadcc.folio;
 
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,7 +9,6 @@ import android.nfc.Tag;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -38,16 +36,6 @@ public class MainActivity extends AppCompatActivity {
         stopNfcDetector();
 
         super.onPause();
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(intent.getAction())) {
-            Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-
-            String cardId = bytesToHexString(tag.getId());
-            Toast.makeText(this, cardId, Toast.LENGTH_LONG).show();
-        }
     }
 
     private void onNfcDetectorChange() {
@@ -84,23 +72,28 @@ public class MainActivity extends AppCompatActivity {
 
         if (nfcAdapter == null) return;
 
-        Intent i = new Intent(this, this.getClass());
-        i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        int flags = NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK | NfcAdapter.FLAG_READER_NFC_A;
 
-        PendingIntent nfcPendingIntent = PendingIntent.getActivity(this, 0, i, 0);
-
-        IntentFilter ndef = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
-        ndef.addCategory(Intent.CATEGORY_DEFAULT);
-
-        IntentFilter[] intentFilters = new IntentFilter[]{ndef};
-
-        nfcAdapter.enableForegroundDispatch(this, nfcPendingIntent, intentFilters, null);
+        nfcAdapter.enableReaderMode(this, new NfcAdapter.ReaderCallback() {
+            @Override
+            public void onTagDiscovered(Tag tag) {
+                final String cardId = bytesToHexString(tag.getId());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        TextView tuiTextView = (TextView) findViewById(R.id.textView_tui);
+                        if (tuiTextView == null) return;
+                        tuiTextView.setText("Card ID: " + cardId);
+                    }
+                });
+            }
+        }, flags, null);
     }
 
     public void stopNfcReader() {
         NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (nfcAdapter == null) return;
-        nfcAdapter.disableForegroundDispatch(this);
+        nfcAdapter.disableReaderMode(this);
     }
 
     private String bytesToHexString(byte[] src) {
