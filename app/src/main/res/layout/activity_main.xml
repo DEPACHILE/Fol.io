@@ -17,6 +17,7 @@
         android:layout_height="wrap_content"
         android:text="hola mundo"
         android:background="#ffffff"
-        android:textColor="#ffff00"/>
+        android:textColor="#ffff00"
+        android:textSize="30sp" />
 
 </RelativeLayout>
