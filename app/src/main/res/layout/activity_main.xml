@@ -9,15 +9,15 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="cl.cadcc.folio.MainActivity"
-    android:background="#0000ff">
+    android:background="#e3e2db">
 
     <TextView
         android:id="@+id/textView_tui"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="hola mundo"
-        android:background="#fffff0"
         android:textColor="#000000"
+        android:textAlignment="center"
         android:textSize="30sp" />
 
 </RelativeLayout>
