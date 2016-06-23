@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         TextView tuiTextView = (TextView) findViewById(R.id.textView_tui);
                         if (tuiTextView == null) return;
-                        tuiTextView.setText("Card ID: " + cardId);
+                        tuiTextView.setText("Card ID: " + cardId.substring(2,cardId.length()).toUpperCase());
                     }
                 });
             }
