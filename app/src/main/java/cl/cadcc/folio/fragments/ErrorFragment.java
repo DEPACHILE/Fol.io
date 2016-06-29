@@ -6,6 +6,10 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 
 import cl.cadcc.folio.R;
 
@@ -24,7 +28,11 @@ public class ErrorFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_error, container, false);
+        View v = inflater.inflate(R.layout.fragment_error, container, false);
+        ImageView imageView = (ImageView) v.findViewById(R.id.loading);
+        GlideDrawableImageViewTarget imageViewTarget = new GlideDrawableImageViewTarget(imageView);
+        Glide.with(this).load(R.drawable.cry).into(imageViewTarget);
+        return v;
     }
 
 }
