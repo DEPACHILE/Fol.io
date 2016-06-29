@@ -153,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements WelcomeFragment.O
 
 
                 // Do something with the response
-                Log.d("testAPI",tweetText);
+                Log.d("testAPI","array");
             }
             @Override
             public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
