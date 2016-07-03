@@ -4,7 +4,7 @@ import com.loopj.android.http.*;
 
 public class ApiHttps {
 
-    private static final String BASE_URL = "http://192.168.34.157:9000/";
+    private static final String BASE_URL = "https://shrouded-shelf-58465.herokuapp.com/";
 
     private static AsyncHttpClient client = new AsyncHttpClient();
 

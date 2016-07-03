@@ -22,14 +22,14 @@
         android:padding="50dp"
         android:background="#20212121">
 
-        <ImageView
+        <!-- <ImageView
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:id="@+id/imageView"
             android:src="@drawable/turing"
             android:layout_gravity="center"
             android:layout_marginBottom="10dp"
-            />
+            /> -->
 
         <TextView
             android:id="@+id/name"
@@ -71,13 +71,15 @@
             android:gravity="center"
             android:id="@+id/folioField"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="30dp"/>
+            android:layout_marginTop="30dp"
+            android:singleLine="true"
+            android:imeOptions="actionDone"/>
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Enviar"
-            android:id="@+id/sendButton"
+            android:id="@+id/sendFolio"
             android:onClick="sendFolio"
             android:layout_gravity="center_horizontal" />
 

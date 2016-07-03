@@ -1,5 +1,6 @@
 package cl.cadcc.folio;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -50,17 +51,20 @@ public class MainActivity extends AppCompatActivity implements WelcomeFragment.O
             try {
                 int code = response.getInt("code");
                 if (code!=200) {
-                    throw new Exception();
+                    onFailure(code,headers,new Throwable(),response);
                 }
                 JSONObject entity = response.getJSONArray("content").getJSONObject(0).getJSONObject("entity");
                 int id = entity.getInt("id");
-                String name = entity.getString("name");
-                String lastName = entity.getString("lastName");
+                String lastname = entity.getString("name");
+                String name = entity.getString("lastname");
                 String rut = entity.getString("rut");
+                String career = entity.getString("career");
                 TextView nameView = (TextView)findViewById(R.id.name);
                 TextView rutView = (TextView)findViewById(R.id.rut);
-                nameView.setText(name+" "+lastName);
+                TextView careerView = (TextView)findViewById(R.id.career);
+                nameView.setText(name+" "+lastname);
                 rutView.setText(rut);
+                careerView.setText(career);
             } catch (Exception e) {
                 onFailure(400,headers,e,response);
             }
@@ -96,7 +100,9 @@ public class MainActivity extends AppCompatActivity implements WelcomeFragment.O
             try {
                 errorText = errorResponse.getJSONObject("content").getString("error");
             } catch (Exception e) {
-                errorText = "Error Desconocido";
+                // La respuesta era nula
+                e.printStackTrace();
+                errorText = "No es posible conectarse al servidor";
             }
             error.setText("Error: " + errorText);
         }
@@ -168,8 +174,7 @@ public class MainActivity extends AppCompatActivity implements WelcomeFragment.O
     public void stopNfcReader() {
         NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (nfcAdapter == null) return;
-        if (nfcAdapter.isEnabled())
-            nfcAdapter.disableReaderMode(this);
+        nfcAdapter.disableReaderMode(this);
     }
 
     private String bytesToHexString(byte[] src) {
@@ -193,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements WelcomeFragment.O
 
     public void findUser(String tuiId) throws JSONException {
         changeToConnectingFragment();
-        ApiHttps.get("/vote/1/1/"+tuiId+"/", null, folioHandler);
+        ApiHttps.get("/voteTui/1/1/"+tuiId+"/", null, folioHandler);
     }
     public void voteRut(String rut) {
         changeToConnectingFragment();
@@ -205,14 +210,13 @@ public class MainActivity extends AppCompatActivity implements WelcomeFragment.O
         Fragment serverConnectFragment = new ServerConnectFragment();
         FragmentTransaction t = getSupportFragmentManager().beginTransaction();
         t.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        t.addToBackStack("connect");
         t.replace(R.id.folio_fragment,serverConnectFragment , "connect");
         t.commit();
         getSupportFragmentManager().executePendingTransactions();
     }
 
     public void manuallySendId(View v) {
-        EditText mEdit = (EditText)findViewById(R.id.idField);
+        EditText mEdit = (EditText)findViewById(R.id.rutField);
         String rut = mEdit.getText().toString();
         try {
             voteRut(rut);
@@ -232,7 +236,6 @@ public class MainActivity extends AppCompatActivity implements WelcomeFragment.O
         FragmentTransaction t = getSupportFragmentManager().beginTransaction();
         t.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         t.replace(R.id.folio_fragment,serverConnectFragment , "connect");
-        t.addToBackStack("connect");
         t.commit();
         getSupportFragmentManager().executePendingTransactions();
         ApiHttps.get(url, null, new JsonHttpResponseHandler() {
@@ -243,7 +246,6 @@ public class MainActivity extends AppCompatActivity implements WelcomeFragment.O
                 FragmentTransaction t = getSupportFragmentManager().beginTransaction();
                 t.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                 t.replace(R.id.folio_fragment,identityFragment , "done");
-                t.addToBackStack("done");
                 t.commit();
                 getSupportFragmentManager().executePendingTransactions();
             }
@@ -277,5 +279,10 @@ public class MainActivity extends AppCompatActivity implements WelcomeFragment.O
                 error.setText("Error: No se pudo registrar el voto.");
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        this.recreate();
     }
 }
