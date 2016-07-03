@@ -25,7 +25,7 @@
         android:id="@+id/nfc_value"
         android:layout_width="fill_parent"
         android:layout_height="0dp"
-        android:text="adios mundo"
+        android:text="Conectando al servidor..."
         android:textColor="#ffffff"
         android:textAlignment="center"
         android:textSize="30sp"

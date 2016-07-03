@@ -30,6 +30,7 @@ public class WelcomeFragment extends Fragment {
         super.onAttach(context);
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
+            mListener.startNfcReader();
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -37,12 +38,28 @@ public class WelcomeFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        mListener.startNfcReader();
+        mListener.onNfcDetectorChange();
+    }
+
+    public void onPause() {
+        super.onResume();
+        mListener.stopNfcReader();
+        mListener.onNfcDetectorChange();
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
+        mListener.stopNfcReader();
         mListener = null;
     }
 
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
+        public void startNfcReader();
+        public void stopNfcReader();
+        public void onNfcDetectorChange();
     }
 }

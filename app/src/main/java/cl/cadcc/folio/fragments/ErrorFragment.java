@@ -29,7 +29,7 @@ public class ErrorFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_error, container, false);
-        ImageView imageView = (ImageView) v.findViewById(R.id.loading);
+        ImageView imageView = (ImageView) v.findViewById(R.id.imageView);
         GlideDrawableImageViewTarget imageViewTarget = new GlideDrawableImageViewTarget(imageView);
         Glide.with(this).load(R.drawable.cry).into(imageViewTarget);
         return v;

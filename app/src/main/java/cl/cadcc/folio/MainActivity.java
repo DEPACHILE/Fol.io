@@ -12,6 +12,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,6 +25,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import cl.cadcc.folio.api.ApiHttps;
+import cl.cadcc.folio.fragments.DoneFragment;
+import cl.cadcc.folio.fragments.ErrorFragment;
+import cl.cadcc.folio.fragments.IdentityFragment;
 import cl.cadcc.folio.fragments.ServerConnectFragment;
 import cl.cadcc.folio.fragments.WelcomeFragment;
 import cz.msebera.android.httpclient.Header;
@@ -31,6 +36,71 @@ import cz.msebera.android.httpclient.HttpStatus;
 public class MainActivity extends AppCompatActivity implements WelcomeFragment.OnFragmentInteractionListener {
 
     private BroadcastReceiver nfcChangedReceiver;
+
+    private JsonHttpResponseHandler folioHandler = new JsonHttpResponseHandler() {
+        @Override
+        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+            Log.d("testAPISUCCESS",response.toString());
+            Fragment identityFragment = new IdentityFragment();
+            FragmentTransaction t = getSupportFragmentManager().beginTransaction();
+            t.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            t.replace(R.id.folio_fragment,identityFragment , "identify");
+            t.commit();
+            getSupportFragmentManager().executePendingTransactions();
+            try {
+                int code = response.getInt("code");
+                if (code!=200) {
+                    throw new Exception();
+                }
+                JSONObject entity = response.getJSONArray("content").getJSONObject(0).getJSONObject("entity");
+                int id = entity.getInt("id");
+                String name = entity.getString("name");
+                String lastName = entity.getString("lastName");
+                String rut = entity.getString("rut");
+                TextView nameView = (TextView)findViewById(R.id.name);
+                TextView rutView = (TextView)findViewById(R.id.rut);
+                nameView.setText(name+" "+lastName);
+                rutView.setText(rut);
+            } catch (Exception e) {
+                onFailure(400,headers,e,response);
+            }
+        };
+
+        @Override
+        public void onSuccess(int statusCode, Header[] headers, JSONArray timeline) {
+            // Pull out the first event on the public timeline
+            JSONObject firstEvent = null;
+            String tweetText = null;
+            try {
+                firstEvent = (JSONObject) timeline.get(0);
+                tweetText = firstEvent.getString("text");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+
+            // Do something with the response
+            Log.d("testAPI","array");
+        }
+        @Override
+        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+            Log.d("testAPI","Error");
+            Fragment errorFragment = new ErrorFragment();
+            FragmentTransaction t = getSupportFragmentManager().beginTransaction();
+            t.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            t.replace(R.id.folio_fragment,errorFragment , "error");
+            t.commit();
+            getSupportFragmentManager().executePendingTransactions();
+            TextView error = (TextView)findViewById(R.id.error_data);
+            String errorText;
+            try {
+                errorText = errorResponse.getJSONObject("content").getString("error");
+            } catch (Exception e) {
+                errorText = "Error Desconocido";
+            }
+            error.setText("Error: " + errorText);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,22 +116,14 @@ public class MainActivity extends AppCompatActivity implements WelcomeFragment.O
     @Override
     protected void onResume() {
         super.onResume();
-
-        startNfcDetector();
-        startNfcReader();
-
-        onNfcDetectorChange();
     }
 
     @Override
     protected void onPause() {
-        stopNfcReader();
-        stopNfcDetector();
-
         super.onPause();
     }
 
-    private void onNfcDetectorChange() {
+    public void onNfcDetectorChange() {
         NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(MainActivity.this);
         TextView tuiTextView = (TextView) findViewById(R.id.textView_tui);
 
@@ -74,20 +136,6 @@ public class MainActivity extends AppCompatActivity implements WelcomeFragment.O
         } else {
             tuiTextView.setText("Acerca la tarjeta, por favor.");
         }
-    }
-
-    private void startNfcDetector() {
-        nfcChangedReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                onNfcDetectorChange();
-            }
-        };
-        registerReceiver(nfcChangedReceiver, new IntentFilter(NfcAdapter.ACTION_ADAPTER_STATE_CHANGED));
-    }
-
-    public void stopNfcDetector() {
-        unregisterReceiver(nfcChangedReceiver);
     }
 
     public void startNfcReader() {
@@ -104,25 +152,12 @@ public class MainActivity extends AppCompatActivity implements WelcomeFragment.O
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Fragment serverConnectFragment = new ServerConnectFragment();
-                        FragmentTransaction t = getSupportFragmentManager().beginTransaction();
-                        t.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                        t.replace(R.id.folio_fragment,serverConnectFragment , "connect");
-                        t.commit();
-                        getSupportFragmentManager().executePendingTransactions();
-                        TextView nfcValue = (TextView) findViewById(R.id.nfc_value);
-                        if (nfcValue == null) {
-                            Log.d("Adderou", "Es nulo!");
-                            return;
-                        } else {
-                            nfcValue.setText("Card ID: " + cardId.substring(2, cardId.length()).toUpperCase());
-                            String tuiId=cardId.substring(2, cardId.length()).toUpperCase();
-                            try {
-                                Log.d("testTUID",tuiId);
-                                findUser(tuiId);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
+                        String tuiId=cardId.substring(2, cardId.length()).toUpperCase();
+                        try {
+                            Log.d("testTUID",tuiId);
+                            findUser(tuiId);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
                     }
                 });
@@ -130,13 +165,87 @@ public class MainActivity extends AppCompatActivity implements WelcomeFragment.O
         }, flags, null);
     }
 
+    public void stopNfcReader() {
+        NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        if (nfcAdapter == null) return;
+        if (nfcAdapter.isEnabled())
+            nfcAdapter.disableReaderMode(this);
+    }
+
+    private String bytesToHexString(byte[] src) {
+
+        if (src == null || src.length <= 0) {
+            return null;
+        }
+
+        StringBuilder stringBuilder = new StringBuilder("0x");
+
+        char[] buffer = new char[2];
+        for (byte aSrc : src) {
+            buffer[0] = Character.forDigit((aSrc >>> 4) & 0x0F, 16);
+            buffer[1] = Character.forDigit(aSrc & 0x0F, 16);
+            stringBuilder.append(buffer);
+        }
+
+        return stringBuilder.toString();
+    }
+
 
     public void findUser(String tuiId) throws JSONException {
-        ApiHttps.get("/vote/1/1/"+tuiId+"/1", null, new JsonHttpResponseHandler() {
+        changeToConnectingFragment();
+        ApiHttps.get("/vote/1/1/"+tuiId+"/", null, folioHandler);
+    }
+    public void voteRut(String rut) {
+        changeToConnectingFragment();
+        ApiHttps.get("/voteRut/1/1/"+rut+"/", null, folioHandler);
+    };
+
+    public void changeToConnectingFragment() {
+        stopNfcReader();
+        Fragment serverConnectFragment = new ServerConnectFragment();
+        FragmentTransaction t = getSupportFragmentManager().beginTransaction();
+        t.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        t.addToBackStack("connect");
+        t.replace(R.id.folio_fragment,serverConnectFragment , "connect");
+        t.commit();
+        getSupportFragmentManager().executePendingTransactions();
+    }
+
+    public void manuallySendId(View v) {
+        EditText mEdit = (EditText)findViewById(R.id.idField);
+        String rut = mEdit.getText().toString();
+        try {
+            voteRut(rut);
+        } catch (Exception e) {
+            Toast.makeText(this,"No se pudo encontrar este rut!",Toast.LENGTH_SHORT);
+        }
+    }
+
+    public void sendFolio(View v) throws JSONException {
+        TextView rutView = (TextView)findViewById(R.id.rut);
+        String rut = rutView.getText().toString();
+        EditText mEdit = (EditText)findViewById(R.id.folioField);
+        String folio = mEdit.getText().toString();
+        String url = "/voteRut/1/1/"+rut+"/"+folio+"/";
+        Log.d("Adderou",url);
+        Fragment serverConnectFragment = new ServerConnectFragment();
+        FragmentTransaction t = getSupportFragmentManager().beginTransaction();
+        t.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        t.replace(R.id.folio_fragment,serverConnectFragment , "connect");
+        t.addToBackStack("connect");
+        t.commit();
+        getSupportFragmentManager().executePendingTransactions();
+        ApiHttps.get(url, null, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 Log.d("testAPISUCCESS",response.toString());
-                Toast.makeText(getApplicationContext(),response.toString(), Toast.LENGTH_LONG).show();
+                Fragment identityFragment = new DoneFragment();
+                FragmentTransaction t = getSupportFragmentManager().beginTransaction();
+                t.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                t.replace(R.id.folio_fragment,identityFragment , "done");
+                t.addToBackStack("done");
+                t.commit();
+                getSupportFragmentManager().executePendingTransactions();
             }
 
             @Override
@@ -158,31 +267,15 @@ public class MainActivity extends AppCompatActivity implements WelcomeFragment.O
             @Override
             public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
                 Log.d("testAPI","Error");
+                Fragment errorFragment = new ErrorFragment();
+                FragmentTransaction t = getSupportFragmentManager().beginTransaction();
+                t.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                t.replace(R.id.folio_fragment,errorFragment , "connect");
+                t.commit();
+                getSupportFragmentManager().executePendingTransactions();
+                TextView error = (TextView)findViewById(R.id.error_data);
+                error.setText("Error: No se pudo registrar el voto.");
             }
         });
-    }
-
-    public void stopNfcReader() {
-        NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
-        if (nfcAdapter == null) return;
-        nfcAdapter.disableReaderMode(this);
-    }
-
-    private String bytesToHexString(byte[] src) {
-
-        if (src == null || src.length <= 0) {
-            return null;
-        }
-
-        StringBuilder stringBuilder = new StringBuilder("0x");
-
-        char[] buffer = new char[2];
-        for (byte aSrc : src) {
-            buffer[0] = Character.forDigit((aSrc >>> 4) & 0x0F, 16);
-            buffer[1] = Character.forDigit(aSrc & 0x0F, 16);
-            stringBuilder.append(buffer);
-        }
-
-        return stringBuilder.toString();
     }
 }

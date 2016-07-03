@@ -14,6 +14,7 @@
     android:background="#d9322d">
 
     <ImageView
+        android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="5"
@@ -21,7 +22,7 @@
         />
 
     <TextView
-        android:id="@+id/textView_tui"
+        android:id="@+id/error_data"
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:text="Error"

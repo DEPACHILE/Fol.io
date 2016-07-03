@@ -32,6 +32,7 @@
             />
 
         <TextView
+            android:id="@+id/name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Alan Turing"
@@ -41,6 +42,7 @@
             android:textStyle="bold"/>
 
         <TextView
+            android:id="@+id/rut"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="5.123.456-7"
@@ -50,6 +52,7 @@
             android:textStyle="bold"/>
 
         <TextView
+            android:id="@+id/career"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Ingeniería Civil en Computación"
@@ -66,7 +69,7 @@
             android:ems="10"
             android:hint="Ingrese número de Folio"
             android:gravity="center"
-            android:id="@+id/editText"
+            android:id="@+id/folioField"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="30dp"/>
 
@@ -74,7 +77,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Enviar"
-            android:id="@+id/button"
+            android:id="@+id/sendButton"
+            android:onClick="sendFolio"
             android:layout_gravity="center_horizontal" />
 
         </LinearLayout>

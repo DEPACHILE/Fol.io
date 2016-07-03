@@ -11,21 +11,21 @@
     tools:context="cl.cadcc.folio.MainActivity"
     android:orientation="vertical"
     android:layout_weight="1"
-    android:background="#e3e2db">
+    android:background="#36af55">
 
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="5"
-        android:src="@drawable/tarjeta"
+        android:src="@drawable/simpsons"
         />
 
     <TextView
         android:id="@+id/textView_tui"
         android:layout_width="fill_parent"
         android:layout_height="0dp"
-        android:text="Acerca la tarjeta, por favor."
-        android:textColor="#000000"
+        android:text="Datos enviados. ¡Gracias por votar!"
+        android:textColor="#ffffff"
         android:textAlignment="center"
         android:textSize="30sp"
         android:layout_weight="5"
