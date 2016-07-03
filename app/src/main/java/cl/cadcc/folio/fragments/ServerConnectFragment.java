@@ -53,5 +53,4 @@ public class ServerConnectFragment extends Fragment {
         super.onDetach();
         mListener = null;
     }
-
 }

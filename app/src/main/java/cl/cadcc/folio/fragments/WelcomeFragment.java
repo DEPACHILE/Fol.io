@@ -52,6 +52,7 @@ public class WelcomeFragment extends Fragment {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
             mListener.startNfcReader();
+            mListener.setStartFragment(true);
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -74,7 +75,7 @@ public class WelcomeFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener.stopNfcReader();
+        mListener.setStartFragment(false);
         mListener = null;
     }
 
@@ -82,5 +83,6 @@ public class WelcomeFragment extends Fragment {
         public void startNfcReader();
         public void stopNfcReader();
         public void onNfcDetectorChange();
+        public void setStartFragment(boolean value);
     }
 }

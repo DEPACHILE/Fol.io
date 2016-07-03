@@ -37,6 +37,7 @@ import cz.msebera.android.httpclient.HttpStatus;
 public class MainActivity extends AppCompatActivity implements WelcomeFragment.OnFragmentInteractionListener {
 
     private BroadcastReceiver nfcChangedReceiver;
+    boolean startFragment = true;
 
     private JsonHttpResponseHandler folioHandler = new JsonHttpResponseHandler() {
         @Override
@@ -283,8 +284,16 @@ public class MainActivity extends AppCompatActivity implements WelcomeFragment.O
         });
     }
 
+    public void setStartFragment(boolean value) {
+        startFragment = value;
+    }
+
     @Override
     public void onBackPressed() {
-        this.recreate();
+        if (!startFragment) {
+            this.recreate();
+        } else {
+            super.onBackPressed();
+        }
     }
 }
