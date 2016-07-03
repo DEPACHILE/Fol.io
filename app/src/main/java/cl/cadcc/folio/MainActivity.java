@@ -198,10 +198,12 @@ public class MainActivity extends AppCompatActivity implements WelcomeFragment.O
 
     public void findUser(String tuiId) throws JSONException {
         changeToConnectingFragment();
+        tuiId = tuiId.length() == 0 ? "null" : tuiId;
         ApiHttps.get("/voteTui/1/1/"+tuiId+"/", null, folioHandler);
     }
     public void voteRut(String rut) {
         changeToConnectingFragment();
+        rut = rut.length() == 0 ? "null" : rut;
         ApiHttps.get("/voteRut/1/1/"+rut+"/", null, folioHandler);
     };
 
